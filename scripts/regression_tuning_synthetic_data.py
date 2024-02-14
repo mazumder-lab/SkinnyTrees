@@ -14,11 +14,10 @@ from copy import deepcopy
 from sklearn.metrics import mean_squared_error, recall_score, f1_score, accuracy_score, roc_auc_score
 
 import pathlib
-sys.path.insert(0, os.path.abspath(str(pathlib.Path(__file__).absolute()).split('src')[0]))
-from src import utils_multitask
-
+sys.path.insert(0, os.path.abspath(str(pathlib.Path(__file__).absolute()).split('scripts')[0]))
 from src import models
 from src import sparse_soft_trees
+from src import utils
 
 
 def get_available_gpus():
@@ -90,7 +89,7 @@ def objective(
     print("==============No LR scheduler, Epochs:", epochs, "Batch-size:", batch_size)
     print("==============epochs:", epochs)
     learning_rate = constant_learning_rate
-    lr_schedule = sparse_soft_trees.ConstantLearningRate(
+    lr_schedule = utils.ConstantLearningRate(
         learning_rate
     )
     optim = tf.keras.optimizers.SGD(lr_schedule)

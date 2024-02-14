@@ -12,16 +12,11 @@ such that it recognizes GPU device.
 * `SkinnyTrees`: End-to-end Feature Selection Approach for Learning Skinny Trees with Group L0-L2.
 
 ## Running Code
-Scripts folder contains different bash scripts for running SkinnyTrees on synthetic dataset as well as real-world datasets for different seeds.
+Scripts folder contains different bash scripts for running SkinnyTrees on synthetic dataset as well as real-world datasets.
 
-For example, SkinnyTrees can be run for different hyperparameters on one seed as follows:
+For example, SkinnyTrees can be run for different hyperparameters as follows:
 ```bash
-/home/gridsan/shibal/.conda/envs/aoas/bin/python /home/gridsan/shibal/elaan/src/elaani/elaani_census.py --load_directory '/home/gridsan/shibal/elaan/Census-Data' --seed 1 --relative_penalty 1.0 --grid_search 'reduced' --run_first_round --version 1 --eval_criteria 'mse' --logging
-```
-
-SkinnyTrees can be run on synthetic data for different hyperparameters on one seed as follows:
-```bash
-/home/gridsan/shibal/.conda/envs/aoas/bin/python /home/gridsan/shibal/elaan/src/elaanh/elaanh_synthetic.py  --dataset 'synthetic' --dist 'normal' --correlation 0.5 --seed $SLURM_ARRAY_TASK_ID --train_size 100 --version 1 --r 1.0 --Ki 10 --Kij 5
+/home/gridsan/shibal/.conda/envs/MOETF29/bin/python /home/gridsan/shibal/SkinnyTrees/scripts/main_classification_public_data.py --data 'churn' --data_type 'classification' --load_directory /home/gridsan/shibal/public-datasets --seed 8 --anneal --max_trees 100 --max_depth 6 --max_epochs 500 --n_trials 2000 --version 1 --tuning_seed 0 --loss 'cross-entropy' --save_directory ./logs_trees/skinny_trees/publicdata
 ```
 
 ## Citing SkinnyTrees

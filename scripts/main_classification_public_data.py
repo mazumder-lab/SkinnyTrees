@@ -16,13 +16,14 @@ from tensorflow.python.client import device_lib
 from sklearn.metrics import accuracy_score, roc_auc_score
 
 import pathlib
+sys.path.insert(0, os.path.abspath(str(pathlib.Path(__file__).absolute()).split('scripts')[0]))
 
-import pathlib
-sys.path.insert(0, os.path.abspath(str(pathlib.Path(__file__).absolute()).split('src')[0]))
+print(sys.version, sys.platform, sys.executable) #Displays what environment you are actually using.
 
-from data import data_utils
 from src import models
 from src import sparse_soft_trees
+from src import utils
+from data import data_utils
 
 
 from tensorflow.python.client import device_lib
@@ -70,7 +71,7 @@ def objective(
     
     if not use_passed_hyperparameters:
         config.update({
-            'constant_batch_size': 16, # trial.suggest_categorical('constant_batch_size', [16])
+            'constant_batch_size': 16,
             'batch_size_scaler': trial.suggest_categorical('batch_size_scaler', [1,4,16,64]),
             'constant_learning_rate': trial.suggest_loguniform('constant_learning_rate', 1e-2, 1e1),
             'num_trees': trial.suggest_int('num_trees', 1, args.max_trees),
@@ -90,7 +91,7 @@ def objective(
         else:
             config['kernel_constraint'] = trial.suggest_loguniform('kernel_constraint', 1e+0, 1e+4)
     else:
-        config['constant_batch_size'] =  16 # trial.suggest_categorical('constant_batch_size', [16])
+        config['constant_batch_size'] =  16
         config['batch_size_scaler'] = trial.suggest_categorical('constant_batch_size', [args.batch_size_scaler])
         config['constant_learning_rate'] = trial.suggest_categorical('constant_learning_rate', [args.constant_learning_rate])
         config['num_trees'] = trial.suggest_categorical('num_trees', [args.num_trees])
@@ -123,7 +124,7 @@ def objective(
     print("==============No LR scheduler, Epochs:", epochs, "Batch-size:", batch_size)
     print("==============epochs:", epochs)
     learning_rate = constant_learning_rate
-    lr_schedule = sparse_soft_trees.ConstantLearningRate(
+    lr_schedule = utils.ConstantLearningRate(
         learning_rate
     )
     optim = tf.keras.optimizers.SGD(lr_schedule)
@@ -152,9 +153,6 @@ def objective(
             
     ### Loss parameters
     loss_criteria = config['loss_criteria']
-    # exponentials and sigmoids inside distributions
-    output_activation = 'linear'
-    loss = losses.NegativeLogLikelihood()
         
     ### Optimization parameters
     if loss_criteria in ['mse']:
@@ -206,24 +204,22 @@ def objective(
     if len(get_available_gpus())==0:
         history = model.fit(x=data_processed.x_train_processed, 
                   y=data_processed.y_train_processed,
-                  sample_weight=data_processed.w_train,
                   epochs=epochs, 
                   batch_size=batch_size, 
                   shuffle=True,
                   callbacks=callbacks,
-                  validation_data=(data_processed.x_valid_processed, data_processed.y_valid_processed, data_processed.w_valid),
+                  validation_data=(data_processed.x_valid_processed, data_processed.y_valid_processed),
                   verbose=1, 
                   )  
     else:
         with tf.device(get_available_gpus()[0]):
             history = model.fit(x=data_processed.x_train_processed, 
                       y=data_processed.y_train_processed,
-                      sample_weight=data_processed.w_train,
                       epochs=epochs, 
                       batch_size=batch_size, 
                       shuffle=True,
                       callbacks=callbacks,
-                      validation_data=(data_processed.x_valid_processed, data_processed.y_valid_processed, data_processed.w_valid),
+                      validation_data=(data_processed.x_valid_processed, data_processed.y_valid_processed),
                       verbose=0, 
                       )  
     number_of_epochs_it_ran = len(history.history['loss'])
@@ -250,7 +246,6 @@ def objective(
         # Check for infinite loss
         training_loss = model.evaluate(data_processed.x_train_processed,
                                        data_processed.y_train_processed,
-                                       sample_weight=data_processed.w_train,
                                        batch_size=batch_size,
                                        verbose=0)
 
@@ -434,7 +429,6 @@ def main():
     trial_nb = 0
 
     filename = "study"
-    filename = filename + "-{}".format(args.architecture)
     if args.anneal:
         filename = filename + "-anneal"
     filename = filename + "-seed{}".format(args.seed)

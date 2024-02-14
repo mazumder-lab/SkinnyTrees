@@ -7,6 +7,12 @@ from tensorflow.keras import constraints
 from tensorflow.keras import backend as K
 from typing import Callable
 
+import pathlib
+import os
+import sys
+sys.path.insert(0, os.path.abspath(str(pathlib.Path(__file__).absolute()).split('src')[0]))
+from src import utils
+
 class ProximalGroupL0(tf.keras.constraints.Constraint):
     """Applies group-wise proximal operator after gradient update for Group L0.
     
@@ -32,7 +38,7 @@ class ProximalGroupL0(tf.keras.constraints.Constraint):
     Returns:
         w: Float Tensor of shape (num_features, num_trees*num_nodes).
     """
-    def __init__(self, lr=ConstantLearningRate(0.), lam=0., use_annealing=False, temperature=0.1, name='ProximalGroupL0', **kwargs):
+    def __init__(self, lr=utils.ConstantLearningRate(0.), lam=0., use_annealing=False, temperature=0.1, name='ProximalGroupL0', **kwargs):
         super(ProximalGroupL0, self).__init__(**kwargs)
         self.lam = lam
         assert isinstance(lr, Callable)

@@ -11,8 +11,6 @@ import time
 import argparse
 import collections
 
-import pathlib
-sys.path.insert(0, os.path.abspath(str(pathlib.Path(__file__).absolute()).split('src')[0]))
 
 # from src import data_utils
 from sklearn.preprocessing import StandardScaler
@@ -24,6 +22,8 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.compose import ColumnTransformer
 # from sklearn.datasets import load_boston
 
+import pathlib
+sys.path.insert(0, os.path.abspath(str(pathlib.Path(__file__).absolute()).split('scripts')[0]))
 from scripts import regression_tuning_synthetic_data
 
 

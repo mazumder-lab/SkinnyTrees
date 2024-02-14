@@ -64,6 +64,8 @@ def load_processed_classification_public_data(
         print("name:", name, "X.shape:", df_X.shape, "y.shape:", df_y.shape)
 
         np.random.seed(seed)
+        x_train_valid, x_test, y_train_valid, y_test = train_test_split(df_X, df_y, test_size=test_size, stratify=df_y, random_state=seed)
+        x_train, x_valid, y_train, y_valid = train_test_split(x_train_valid, y_train_valid, test_size=val_size, stratify=y_train_valid, random_state=seed)
         print(x_train.nunique())
     else:
         classes = list(set(y_train_valid.values))
@@ -90,13 +92,8 @@ def load_processed_classification_public_data(
     print("Number of NaNs in tasks responses in train+validation set: ", y_train_valid.isna().values.sum(axis=0))
     print("Number of NaNs in tasks responses in train+validation set: ", y_test.isna().values.sum(axis=0))
     
-    w_train = np.ones((y_train.shape[0],))
-    w_valid = np.ones((y_valid.shape[0],))
-    w_train_valid = np.ones((y_train_valid.shape[0],))
-    w_test = np.ones((y_test.shape[0],))
     print(x_train.shape, x_valid.shape, x_train_valid.shape, x_test.shape)
     print(y_train.shape, y_valid.shape, y_train_valid.shape, y_test.shape)
-    print(w_train.shape, w_valid.shape, w_train_valid.shape, w_test.shape)
     
     if name in ['mice-protein', 'isolet']:
         metadata = {
@@ -229,14 +226,12 @@ def load_processed_classification_public_data(
     print(y_train_processed.shape, y_valid_processed.shape, y_train_valid_processed.shape, y_test_processed.shape)
     data_coll = collections.namedtuple('data', ['x_train', 'x_valid', 'x_train_valid', 'x_test',
                                                 'y_train', 'y_valid', 'y_train_valid', 'y_test',
-                                                'w_train', 'w_valid', 'w_train_valid', 'w_test',
                                                 'x_train_processed', 'x_valid_processed',
                                                 'x_train_valid_processed', 'x_test_processed',
                                                 'y_train_processed', 'y_valid_processed',
                                                 'y_train_valid_processed', 'y_test_processed'])
     data_processed = data_coll(x_train, x_valid, x_train_valid, x_test,
                                y_train, y_valid, y_train_valid, y_test,
-                               w_train, w_valid, w_train_valid, w_test,
                                x_train_processed, x_valid_processed,
                                x_train_valid_processed, x_test_processed,
                                y_train_processed, y_valid_processed, y_train_valid_processed, y_test_processed)

@@ -2,7 +2,12 @@
 """
 import tensorflow as tf
 from tensorflow.keras import models
-from sparse_soft_trees import TreeEnsembleWithGroupSparsity
+
+import pathlib
+import os
+import sys
+sys.path.insert(0, os.path.abspath(str(pathlib.Path(__file__).absolute()).split('src')[0]))
+from src import sparse_soft_trees
 
 def create_model(
     x,
@@ -28,7 +33,7 @@ def create_model(
       Keras submodel instantiation
     """
     
-    y = TreeEnsembleWithGroupSparsity(
+    y = sparse_soft_trees.TreeEnsembleWithGroupSparsity(
         num_trees,
         depth,
         leaf_dims[-1],
