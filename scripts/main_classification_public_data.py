@@ -132,8 +132,6 @@ def objective(
     ### Soft Decision Tree parameters 
     num_trees = config['num_trees']
     depth = config['depth'] 
-    # We only use a single layer of Tree Ensemble [Note layer is different than depth]. 
-    # kernel_l2 = trial.suggest_loguniform('kernel_l2', 1e-5, 1e-0)
 
     activation = tf.keras.activations.sigmoid
 

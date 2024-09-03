@@ -47,14 +47,11 @@ def objective(
     num_features = data_processed.x_train_processed.shape[1]
 
     config.update({
-#         'constant_batch_size': trial.suggest_categorical('constant_batch_size', [64]),
         'constant_batch_size': trial.suggest_categorical('constant_batch_size', [16]),
-        'batch_size_scaler': trial.suggest_categorical('batch_size_scaler', np.arange(1,16)),
+        'batch_size_scaler': trial.suggest_categorical('batch_size_scaler', np.arange(1,8)),
         'constant_learning_rate': trial.suggest_loguniform('constant_learning_rate', 1e-3, 1e-1),
         'num_trees': trial.suggest_int('num_trees', 1, args.max_trees),
-#         'num_trees': trial.suggest_int('num_trees', args.max_trees, args.max_trees),
         'depth': trial.suggest_int('depth', 1, args.max_depth),
-#         'depth': trial.suggest_int('depth', args.max_depth, args.max_depth),
         'use_annealing': trial.suggest_categorical('use_annealing', [args.anneal])
     })
 
@@ -63,7 +60,7 @@ def objective(
     else:
         config['epochs'] = trial.suggest_int('epochs', 5, args.max_epochs, 5) # [5,500] originally
 
-    config['kernel_l2'] = trial.suggest_loguniform('kernel_l2', 1e-3, 1e0)
+    config['kernel_l2'] = trial.suggest_loguniform('kernel_l2', 1e-2, 1e2)
     if config['use_annealing']:
         config['kernel_constraint'] = trial.suggest_categorical('kernel_constraint', [100.0])
         config['temperature'] = trial.suggest_loguniform('temperature', 1e-4, 1e-1)
@@ -97,9 +94,6 @@ def objective(
     ### Soft Decision Tree parameters 
     num_trees = config['num_trees']
     depth = config['depth'] 
-    # We only use a single layer of Tree Ensemble [Note layer is different than depth]. 
-    num_layers = 1
-    # kernel_l2 = trial.suggest_loguniform('kernel_l2', 1e-5, 1e-0)
 
     activation = tf.keras.activations.sigmoid
 
@@ -124,7 +118,7 @@ def objective(
     if loss_criteria in ['mse']:
         leaf_dims = (1, )
         x = tf.keras.layers.Input(name='input', shape=data_processed.x_train_processed.shape[1:])
-        submodel = models_multitask.create_multitask_sparse_submodel(
+        submodel = models.create_model(
             x,
             num_trees,
             depth,
@@ -140,23 +134,7 @@ def objective(
         loss = tf.keras.losses.MeanSquaredError()
         model = tf.keras.Model(inputs=x, outputs=ypred)
     elif loss_criteria=='cross-entropy':
-        leaf_dims = (num_classes, )
-        x = tf.keras.layers.Input(name='input', shape=data_processed.x_train_processed.shape[1:])
-        submodel = models_multitask.create_multitask_sparse_submodel(
-            x,
-            num_trees,
-            depth,
-            leaf_dims,
-            activation=activation,
-            kernel_regularizer=kernel_regularizer,
-            kernel_constraint=kernel_constraint,
-        )
-        x = submodel.input
-        outputs = submodel(x)
-        # print(outputs)
-        ypred = tf.keras.layers.Activation('linear')(outputs)
-        loss = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
-        model = tf.keras.Model(inputs=x, outputs=ypred)
+        raise ValueError("loss criteria {} is not supported".format(loss_criteria))
                 
     model.summary()
     # model.layers[1].summary()
@@ -166,8 +144,7 @@ def objective(
         monitor = 'val_mse'
         metrics = ['mse']
     elif data_type=='classification':
-        monitor = 'val_accuracy'
-        metrics = ['accuracy']
+        raise ValueError("data type {} is not supported".format(data_type))
     model.compile(loss=loss, optimizer=optim, metrics=metrics)
     cb = sparse_soft_trees.SparsityHistory()
     callbacks = [
@@ -215,12 +192,8 @@ def objective(
 
     feature_sparsity_history = cb.selected_features[1:(best_epoch+1)]
     approximate_feature_sparsity_history = cb.approximately_selected_features[1:(best_epoch+1)]
-    weight_sparsity_history = cb.selected_weights[1:(best_epoch+1)]
-    approximate_weight_sparsity_history = cb.approximately_selected_weights[1:(best_epoch+1)]
     print('=================feature_sparsity:', feature_sparsity_history[-1])
     print('=================feature_approx_sparsity:', approximate_feature_sparsity_history[-1])
-    print('=================weight_sparsity:', weight_sparsity_history[-1])
-    print('=================weight_approx_sparsity:', approximate_weight_sparsity_history[-1])
         
     with tf.device(get_available_cpus()[0]):
         # Check for infinite loss
@@ -242,34 +215,7 @@ def objective(
                 print('mse (valid):', mse_valid)
                 print('mse (test):', mse_test)
             elif loss_criteria in ['cross-entropy']:                
-                y_valid_pred = model.predict(data_processed.x_valid_processed)
-                y_valid_prob = tf.nn.softmax(y_valid_pred, axis=1).numpy()
-                y_valid_pred_classes = np.argmax(y_valid_prob, axis=1)
-                classes = np.shape(y_valid_prob)[1]
-                if classes==2:
-                    y_valid_prob = tf.gather(y_valid_prob, indices=[1], axis=1).numpy()
-                accuracy_valid = accuracy_score(data_processed.y_valid_processed, y_valid_pred_classes)
-                auc_valid = roc_auc_score(
-                    data_processed.y_valid_processed,
-                    y_valid_prob,
-                    multi_class='ovo'
-                )
-                
-                y_test_pred = model.predict(data_processed.x_test_processed)
-                y_test_prob = tf.nn.softmax(y_test_pred, axis=1).numpy()
-                y_test_pred_classes = np.argmax(y_test_prob, axis=1)
-                if classes==2:
-                    y_test_prob = tf.gather(y_test_prob, indices=[1], axis=1).numpy()
-                accuracy_test = accuracy_score(data_processed.y_test_processed, y_test_pred_classes)
-                auc_test = roc_auc_score(
-                    data_processed.y_test_processed,
-                    y_test_prob,
-                    multi_class='ovo'
-                )
-                print('accuracy (valid):', accuracy_valid)
-                print('accuracy (test):', accuracy_test)
-                print('auc (valid):', auc_valid)
-                print('auc (test):', auc_test)
+                raise ValueError("loss criteria {} is not supported".format(loss_criteria))
                 
             
         else:
@@ -279,16 +225,11 @@ def objective(
                 mse_valid = np.inf
                 mse_test = np.inf
             elif loss_criteria in ['cross-entropy']:
-                accuracy_valid = 0.0
-                accuracy_test = 0.0
-                auc_valid = 0.0
-                auc_test = 0.0
+                raise ValueError("loss criteria {} is not supported".format(loss_criteria))
     
     if loss_criteria in ['mse']:   
         valid_criteria_multitask = np.sum(mse_valid)
     elif loss_criteria in ['cross-entropy']:
-        valid_criteria_multitask = auc_valid
-    else:
         raise ValueError("loss criteria {} is not supported".format(loss_criteria))
         
     print('Valid Criteria:', valid_criteria_multitask)
@@ -313,20 +254,13 @@ def objective(
         trial.set_user_attr("mse_valid", mse_valid)
         trial.set_user_attr("mse_test", mse_test)
     elif loss_criteria in ['cross-entropy']:
-        trial.set_user_attr("accuracy_valid", accuracy_valid)
-        trial.set_user_attr("accuracy_test", accuracy_test)
-        trial.set_user_attr("auc_valid", auc_valid)
-        trial.set_user_attr("auc_test", auc_test)
+        raise ValueError("loss criteria {} is not supported".format(loss_criteria))
     trial.set_user_attr("num_epochs", number_of_epochs_it_ran)
     trial.set_user_attr("val_loss_history", val_loss_history)
     trial.set_user_attr("feature_sparsity_history", feature_sparsity_history)    
     trial.set_user_attr("approximate_feature_sparsity_history", approximate_feature_sparsity_history)    
-    trial.set_user_attr("weight_sparsity_history", weight_sparsity_history)    
-    trial.set_user_attr("approximate_weight_sparsity_history", approximate_weight_sparsity_history)    
     trial.set_user_attr("feature_sparsity", feature_sparsity_history[-1])    
     trial.set_user_attr("approximate_feature_sparsity", approximate_feature_sparsity_history[-1])    
-    trial.set_user_attr("weight_sparsity", weight_sparsity_history[-1])    
-    trial.set_user_attr("approximate_weight_sparsity", approximate_weight_sparsity_history[-1])
     trial.set_user_attr("feature_support_truth", data_processed.feature_support_truth)        
     trial.set_user_attr("feature_support", feature_support)        
     trial.set_user_attr("tpr", tpr)    

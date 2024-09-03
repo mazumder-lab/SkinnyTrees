@@ -39,14 +39,13 @@ def get_available_cpus():
 parser = argparse.ArgumentParser(description='Soft Tree Ensembles with feature selection.')
 
 # Data Arguments
-parser.add_argument('--load_directory', dest='load_directory',  type=str, default='s3://cortex-mit1003-lmdl-workbucket/public-datasets-processed')
 parser.add_argument('--data', dest='data',  type=str, default='synthetic')
 parser.add_argument('--data_type', dest='data_type',  type=str, default='regression')
 parser.add_argument('--seed', dest='seed',  type=int, default=8)
 parser.add_argument('--num_features', dest='num_features',  type=int, default=256)
 parser.add_argument('--sigma', dest='sigma',  type=float, default=0.5)
 parser.add_argument('--train_size', dest='train_size',  type=int, default=100)
-parser.add_argument('--test_size', dest='test_size',  type=float, default=10000)
+parser.add_argument('--test_size', dest='test_size',  type=int, default=10000)
 
 # Model Arguments
 parser.add_argument('--anneal', action='store_true') # for dense-to-sparse
@@ -61,7 +60,7 @@ parser.add_argument('--patience', dest='patience',  type=int, default=25)
 
 # Logging Arguments
 parser.add_argument('--version', dest='version',  type=int, default=1)
-parser.add_argument('--save_directory', dest='save_directory',  type=str, default='./logs/soft_trees/syntheticdata')
+parser.add_argument('--save_directory', dest='save_directory',  type=str, default='./logs_trees/skinny_trees/syntheticdata')
 
 # Tuning Arguments
 parser.add_argument('--tuning_criteria', dest='tuning_criteria',  type=str, default='mse')
@@ -151,6 +150,7 @@ start = timeit.default_timer()
 if args.loss in ['mse']:
     direction = 'minimize'
 elif args.loss in ['cross-entropy']:
+    raise ValueError("loss criteria {} is not supported".format(args.loss))
     direction = 'maximize'
 study = optuna.create_study(sampler=RandomSampler(seed=args.tuning_seed), direction=direction)
 objective_wrapper = lambda trial: regression_tuning_synthetic_data.objective(
