@@ -13,7 +13,7 @@ such that it recognizes GPU device.
 
 
 ## Data Preparation
-data_utils.py in data folder contains how the datasets are processed for classification tasks.
+data_utils.py in data folder contains utilities for how the datasets are processed for classification tasks.
 
 ## Running Code
 Scripts folder contains different bash scripts for running SkinnyTrees on synthetic dataset as well as real-world datasets.
