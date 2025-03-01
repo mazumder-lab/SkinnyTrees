@@ -18,7 +18,9 @@ data_utils.py in data folder contains utilities for how the datasets are process
 ## Running Code
 Scripts folder contains different bash scripts for running SkinnyTrees on synthetic dataset as well as real-world datasets.
 
-For example, SkinnyTrees can be run for different hyperparameters on classification tasks in the paper using the main_classification_public_data.py as follows:
+scripts/ToyExample.ipynb contains a toy example for running SkinnyTrees with a particular choice of hyperparameters. 
+
+SkinnyTrees can be run for different hyperparameters on classification tasks in the paper using the main_classification_public_data.py as follows:
 ```bash
 /home/gridsan/shibal/.conda/envs/MOETF29/bin/python /home/gridsan/shibal/SkinnyTrees/scripts/main_classification_public_data.py --data 'churn' --data_type 'classification' --load_directory /home/gridsan/shibal/public-datasets --seed 8 --anneal --max_trees 100 --max_depth 6 --max_epochs 500 --n_trials 2000 --version 1 --tuning_seed 0 --loss 'cross-entropy' --save_directory ./logs_trees/skinny_trees/publicdata
 ```
