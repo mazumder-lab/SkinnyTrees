@@ -14,9 +14,14 @@ such that it recognizes GPU device.
 ## Running Code
 Scripts folder contains different bash scripts for running SkinnyTrees on synthetic dataset as well as real-world datasets.
 
-For example, SkinnyTrees can be run for different hyperparameters as follows:
+For example, SkinnyTrees can be run for different hyperparameters on classification tasks using the main_classification_public_data.py as follows:
 ```bash
 /home/gridsan/shibal/.conda/envs/MOETF29/bin/python /home/gridsan/shibal/SkinnyTrees/scripts/main_classification_public_data.py --data 'churn' --data_type 'classification' --load_directory /home/gridsan/shibal/public-datasets --seed 8 --anneal --max_trees 100 --max_depth 6 --max_epochs 500 --n_trials 2000 --version 1 --tuning_seed 0 --loss 'cross-entropy' --save_directory ./logs_trees/skinny_trees/publicdata
+```
+
+Similarly, SkinnyTrees can be run for different hyperparameters on synthetic regression tasks using the main_regression_synthetic_data.py as follows:
+```bash
+/home/gridsan/shibal/.conda/envs/MOETF29/bin/python /home/gridsan/shibal/SkinnyTrees/scripts/main_regression_synthetic_data.py --data 'synthetic' --data_type 'regression' --seed $SLURM_ARRAY_TASK_ID --num_features 512 --sigma 0.7 --train_size 200 --test_size 10000 --anneal --max_trees 50 --max_depth 5 --max_epochs 500 --n_trials 500 --version 2 --tuning_seed 0 --loss 'mse' --save_directory ./logs_trees/skinny_trees/syntheticdata
 ```
 
 ## Citing SkinnyTrees
