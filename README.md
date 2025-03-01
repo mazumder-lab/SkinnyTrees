@@ -11,6 +11,10 @@ such that it recognizes GPU device.
 ## Proposed Models
 * `SkinnyTrees`: End-to-end Feature Selection Approach for Learning Skinny Trees with Group L0-L2.
 
+
+## Data Preparation
+data_utils.py in data folder contains how the datasets are processed for classification tasks.
+
 ## Running Code
 Scripts folder contains different bash scripts for running SkinnyTrees on synthetic dataset as well as real-world datasets.
 
