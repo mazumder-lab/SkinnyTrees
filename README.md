@@ -24,6 +24,8 @@ Similarly, SkinnyTrees can be run for different hyperparameters on synthetic reg
 /home/gridsan/shibal/.conda/envs/MOETF29/bin/python /home/gridsan/shibal/SkinnyTrees/scripts/main_regression_synthetic_data.py --data 'synthetic' --data_type 'regression' --seed $SLURM_ARRAY_TASK_ID --num_features 512 --sigma 0.7 --train_size 200 --test_size 10000 --anneal --max_trees 50 --max_depth 5 --max_epochs 500 --n_trials 500 --version 2 --tuning_seed 0 --loss 'mse' --save_directory ./logs_trees/skinny_trees/syntheticdata
 ```
 
+SkinnyTrees-Results.ipynb in the results folder can be used to compile results across the many hyperparameter trials and find best hyperparameter settings with a desired budget. It can also be used to generate a string which can be later used for re-running for the best hyperparameter settings across many seeds for averaging. 
+
 ## Citing SkinnyTrees
 If you find our repository useful in your research, please consider citing the following paper.
 
