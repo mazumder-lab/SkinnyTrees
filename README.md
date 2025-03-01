@@ -5,7 +5,7 @@ This is our implementation of End-to-end Feature Selection Approach for Learning
 [End-to-end Feature Selection Approach for Learning Skinny Trees](https://arxiv.org/abs/2310.18542) by Shibal Ibrahim, Kayhan Behdin, Rahul Mazumder
 
 ## Installation
-This code uses tensorflow 2.0, scikit-learn, numpy, pandas, matplotlib. Please make sure tensorflow installation is done properly
+This code uses tensorflow 2.9, scikit-learn, numpy, pandas, matplotlib. Please make sure tensorflow installation is done properly
 such that it recognizes GPU device.
  
 ## Proposed Models
